@@ -1,0 +1,36 @@
+{
+    "dev": {
+        "app_function": "app.app",
+        "aws_region": "us-east-1",
+        "exclude": [
+            "node_modules",
+            "public",
+            "src",
+            "static",
+            "binaries",
+            "scripts"
+        ],
+        "profile_name": "beatblock",
+        "project_name": "beatblock",
+        "runtime": "python3.9",
+        "s3_bucket": "beatblock-dev",
+        "keep_warm": false
+    },
+    "prod": {
+        "app_function": "app.app",
+        "aws_region": "us-east-1",
+        "exclude": [
+            "node_modules",
+            "public",
+            "src",
+            "static",
+            "binaries",
+            "scripts"
+        ],
+        "profile_name": "beatblock",
+        "project_name": "beatblock",
+        "runtime": "python3.9",
+        "s3_bucket": "beatblock-prod",
+        "keep_warm": false
+    }
+}
