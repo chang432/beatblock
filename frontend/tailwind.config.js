@@ -4,7 +4,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ["Tahoma", "sans-serif"],
+                sans: ["Righteous"],
+                custom: ['nico-moji'],
             },
         },
     },
