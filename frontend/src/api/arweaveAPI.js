@@ -77,7 +77,7 @@ class API {
                     tx_id: tx.id,
                     owner_address: tx.owner.address,
                     note: tx.tags[3].value,
-                    playPauseState: "faPlayComponent",
+                    playPauseState: "play",
                 };
                 new_beats.push(new_beat);
             }

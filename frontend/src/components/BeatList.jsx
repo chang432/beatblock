@@ -7,6 +7,25 @@ const API = new ArweaveAPI();
 const BeatList = () => {
     const [beats, setBeats] = useState([]);
 
+    const playPauseLogic = (pressedTxId) => {
+        var new_beats = [];
+
+        for (const beat of beats) {
+            if (beat.tx_id === pressedTxId) {
+                if (beat.playPauseState === "pause") {
+                    beat.playPauseState = "play";
+                } else {
+                    beat.playPauseState = "pause";
+                }
+            } else {
+                beat.playPauseState = "play";
+            }
+            new_beats.push(beat);
+        }
+
+        setBeats(new_beats);
+    }
+
     useEffect(() => {
         const fetchAndSetBeats = async () => {
             const local_beats = await API.queryAllBeatsArdb();
@@ -27,7 +46,7 @@ const BeatList = () => {
         <div>
             <button onClick={test}>test</button>
             {beats.map((entry, index) => {
-                return <Cell key={index} data={entry} />
+                return <Cell key={index} data={entry} playPauseLogic={playPauseLogic} />
             })}
         </div>
     )

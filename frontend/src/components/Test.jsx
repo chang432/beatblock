@@ -17,7 +17,6 @@ const Test = () => {
         const formJson = Object.fromEntries(formData.entries());
         console.log(formJson)
 
-        const beatName = formJson["beat_name"];
         const beatDesc = formJson["beat_desc"];
         const beatMp3 = formJson["beat_mp3"];
 
@@ -47,7 +46,6 @@ const Test = () => {
                         );
                         transaction.addTag("Content-Type", "text/mpeg");
                         transaction.addTag("App-Name", "BeatBlock");
-                        transaction.addTag("Name", beatName);
                         transaction.addTag("Note", beatDesc);
         
                         await ar.transactions.sign(transaction, privateKey);
@@ -75,8 +73,6 @@ const Test = () => {
 
     return (
         <form className="flex flex-col" method="post" onSubmit={sendTransaction}>
-
-            <input name="beat_name" type="text" defaultValue={"beat name"} />
             <input name="beat_desc" type="text" defaultValue={"beat description"} />
             <div className="flex flex-row">
                 <p>Mp3:</p>
