@@ -1,18 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import rightSymbol from "../assets/rightSymbol.png"
 import downSymbol from "../assets/downSymbol.png"
 import musicNoteSymbol from "../assets/musicNoteSymbol.png"
 import certificateSymbol from "../assets/certificateSymbol.png"
+import xSymbol from "../assets/xSymbol.png"
 
 const Cell = ({data, playPauseLogic}) => {
     const [expanded, setExpanded] = new useState(true);
+    const [showMusicPlayer, setShowMusicPlayer] = new useState(false);
     // const [isPlaying, setIsPlaying] = useState(data.playPauseState === "pause");
 
     const expandPressed = () => {
         setExpanded(!expanded);
     }
 
+    const [progress, setProgress] = useState(0);
+    useEffect(() => {
+        let audio = document.getElementById("beat_player");
+        const updateProgress = () => {
+            setProgress((audio.currentTime / audio.duration) * 100);
+        };
+
+        audio.addEventListener('timeupdate', updateProgress);
+        return () => {
+            audio.removeEventListener('timeupdate', updateProgress);
+        };
+    }, []);
+
     const toggleAudioPlayer = () => {
+        setShowMusicPlayer(!showMusicPlayer);
         playPauseLogic(data.tx_id);
 
         var url = URL.createObjectURL(data.blob);
@@ -59,12 +75,21 @@ const Cell = ({data, playPauseLogic}) => {
                         <p>Note</p>
                         <p>{data.note}</p>
                     </div>
-                    <div className="flex flex-col space-y-4">
+                    {!showMusicPlayer && <div className="flex flex-col space-y-4">
                         <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={downSymbol} onClick={expandPressed} />
                         <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={certificateSymbol} />
                         <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={musicNoteSymbol} onClick={toggleAudioPlayer} />
-                        <audio id="beat_player" />
-                    </div>
+                    </div>}
+                    {showMusicPlayer && <div className="flex flex-col h-32 w-8 space-y-4 items-center justify-end">
+                        <div className="relative h-32 w-8 mb-4 bg-[#CCCCCC] rounded-t-full overflow-hidden">
+                            <div
+                                className="absolute bottom-0 left-0 w-full bg-[#2CEB06] transition-all duration-1000 ease-out"
+                                style={{ height: `${progress}%` }}
+                            />
+                        </div>
+                        <img className="absolute w-8 h-8 mt-8 border border-[#2CEB06] bg-[#1F1F1F] rounded-3xl p-2 hover:cursor-pointer" src={xSymbol} onClick={toggleAudioPlayer} />
+                    </div>}
+                    <audio id="beat_player" />
                 </div>
             </div>}
         </div>
