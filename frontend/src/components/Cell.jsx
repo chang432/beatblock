@@ -75,20 +75,22 @@ const Cell = ({data, playPauseLogic}) => {
                         <p>Note</p>
                         <p>{data.note}</p>
                     </div>
-                    {!showMusicPlayer && <div className="flex flex-col space-y-4">
-                        <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={downSymbol} onClick={expandPressed} />
-                        <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={certificateSymbol} />
-                        <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={musicNoteSymbol} onClick={toggleAudioPlayer} />
-                    </div>}
-                    {showMusicPlayer && <div className="flex flex-col h-32 w-8 space-y-4 items-center justify-end">
-                        <div className="relative h-32 w-8 mb-4 bg-[#CCCCCC] rounded-t-full overflow-hidden">
-                            <div
-                                className="absolute bottom-0 left-0 w-full bg-[#2CEB06] transition-all duration-1000 ease-out"
-                                style={{ height: `${progress}%` }}
-                            />
+                    <div className="flex flex-col h-32 w-8 items-center">
+                        <div className={`absolute z-10 space-y-4 ${showMusicPlayer ? "invisible" : "visible"}`}>
+                            <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={downSymbol} onClick={expandPressed} />
+                            <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={certificateSymbol} />
+                            <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={musicNoteSymbol} onClick={toggleAudioPlayer} />
                         </div>
-                        <img className="absolute w-8 h-8 mt-8 border border-[#2CEB06] bg-[#1F1F1F] rounded-3xl p-2 hover:cursor-pointer" src={xSymbol} onClick={toggleAudioPlayer} />
-                    </div>}
+                        <div className={`absolute z-0 flex flex-col h-32 w-8 justify-end ${showMusicPlayer ? "visible" : "invisible"}`}>
+                            <div className={`relative ${showMusicPlayer ? 'h-32 duration-500' : 'h-0'} w-8 mb-4 bg-[#CCCCCC] rounded-t-full overflow-hidden`}>
+                                <div
+                                    className="absolute bottom-0 left-0 w-full bg-[#2CEB06] transition-all duration-1000 ease-out"
+                                    style={{ height: `${progress}%` }}
+                                />
+                            </div>
+                            <img className="absolute w-8 h-8 mt-8 border border-[#2CEB06] bg-[#1F1F1F] rounded-3xl p-2 hover:cursor-pointer" src={xSymbol} onClick={toggleAudioPlayer} />
+                        </div>
+                    </div>
                     <audio id="beat_player" />
                 </div>
             </div>}
