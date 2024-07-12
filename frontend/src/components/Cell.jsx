@@ -27,6 +27,16 @@ const Cell = ({data, playPauseLogic}) => {
         };
     }, []);
 
+    const handleProgressClick = (e) => {
+        const progressBar = e.currentTarget;
+        const clickY = e.clientY - progressBar.getBoundingClientRect().top;
+        const progressHeight = progressBar.clientHeight;
+        const clickPosition = (progressHeight - clickY) / progressHeight; // Calculate the click position as a fraction of the progress bar height
+        let audio = document.getElementById("beat_player");
+        const newTime = audio.duration * clickPosition; // Calculate the new time
+        audio.currentTime = newTime; // Set the audio's current time
+    };
+
     const toggleAudioPlayer = () => {
         setShowMusicPlayer(!showMusicPlayer);
         playPauseLogic(data.tx_id);
@@ -82,9 +92,9 @@ const Cell = ({data, playPauseLogic}) => {
                             <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={musicNoteSymbol} onClick={toggleAudioPlayer} />
                         </div>
                         <div className={`absolute z-0 flex flex-col h-32 w-8 justify-end ${showMusicPlayer ? "visible" : "invisible"}`}>
-                            <div className={`relative ${showMusicPlayer ? 'h-32 duration-500' : 'h-0'} w-8 mb-4 bg-[#CCCCCC] rounded-t-full overflow-hidden`}>
+                            <div className={`relative ${showMusicPlayer ? 'h-32 duration-500' : 'h-0'} w-8 mb-4 bg-[#CCCCCC] rounded-t-full overflow-hidden`} onClick={handleProgressClick}>
                                 <div
-                                    className="absolute bottom-0 left-0 w-full bg-[#2CEB06] transition-all duration-1000 ease-out"
+                                    className="absolute bottom-0 left-0 w-full bg-[#2CEB06] transition-all duration-500 ease-out"
                                     style={{ height: `${progress}%` }}
                                 />
                             </div>
