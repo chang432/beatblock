@@ -73,10 +73,10 @@ class API {
             for (const tx of txs) {
                 // console.log(tx);
                 let new_beat = {
-                    name: tx.tags[2].value,
+                    name: tx.tags[1].value,
                     tx_id: tx.id,
                     owner_address: tx.owner.address,
-                    note: tx.tags[3].value,
+                    note: tx.tags[2].value,
                     playPauseState: "play",
                 };
                 new_beats.push(new_beat);

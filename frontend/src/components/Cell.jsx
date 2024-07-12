@@ -82,7 +82,7 @@ const Cell = ({data, playPauseLogic}) => {
                         </div>
                     </div>
                     <div className="flex flex-col text-center space-y-4">
-                        <p>Note</p>
+                        <p>Note:</p>
                         <p>{data.note}</p>
                     </div>
                     <div className="flex flex-col h-32 w-8 items-center">
