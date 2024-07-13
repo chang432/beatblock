@@ -11,6 +11,84 @@ const ardb = new ArDB(ar);
 
 class API {
 
+    async generate () {
+        ar.wallets.generate().then(async (key) => {
+            var public_key = await ar.wallets.getAddress(key);
+            var filename = "arweave-key-" + public_key + ".json";
+            var file = new Blob([JSON.stringify(key)], { type: JSON });
+            if (window.navigator.msSaveOrOpenBlob)
+                // IE10+
+                window.navigator.msSaveOrOpenBlob(file, filename);
+            else {
+                // Others
+                var a = document.createElement("a"),
+                    url = URL.createObjectURL(file);
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+        });
+    }
+    
+    async sendTransaction(note, keyfile, audiofile) {
+        // validation logic
+
+        const reader = new FileReader();
+        reader.readAsText(keyfile);
+        reader.onload = async (f) => {
+            try {
+                const keyFileData = JSON.parse(f.target.result);
+                const publicKey = await ar.wallets.getAddress(keyFileData);
+                const privateKey = keyFileData
+                console.log(publicKey);      
+                console.log(privateKey);
+
+                await new Promise((resolve) => {
+                    const fr = new FileReader();
+                    fr.readAsArrayBuffer(audiofile);
+                    fr.onload = async function () {
+                        var arrayBufferOne = fr.result;
+        
+                        await ar.api.get("/mint/" + publicKey + "/100000000000000");
+
+                        let transaction = await ar.createTransaction(
+                            {
+                                data: arrayBufferOne,
+                            },
+                            privateKey
+                        );
+                        transaction.addTag("Content-Type", "text/mpeg");
+                        transaction.addTag("App-Name", "BeatBlock");
+                        transaction.addTag("Note", note);
+        
+                        await ar.transactions.sign(transaction, privateKey);
+        
+                        let uploader = await ar.transactions.getUploader(transaction);
+
+                        while (!uploader.isComplete) {
+                            await uploader.uploadChunk();
+                            console.log(`${uploader.pctComplete}% complete, ${uploader.uploadedChunks}/${uploader.totalChunks}`);
+                        }
+        
+                        // commit("setUploadBeatComplete", true)
+                        resolve()
+                        console.log("Tx successfully sent!");
+                    };
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        // const soundFile = document.getElementById("soundFile").files[0];
+    }
+
     convertEpochToFormattedString(epochTime) {
         // Convert epoch time to milliseconds
         const date = new Date(parseInt(epochTime, 10) * 1000);

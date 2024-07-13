@@ -1,24 +1,24 @@
 import Header from "./components/Header.jsx"
 import BeatList from "./components/BeatList.jsx"
 import Test from "./components/Test.jsx"
-import Login from "./components/Login.jsx"
+import Upload from "./components/Upload.jsx"
 import { useState } from "react"
 
 function App() {
-  const [showLoginView, setShowLoginView] = useState(false);
+  const [showUploadView, setShowUploadView] = useState(false);
 
-  const handleLoginClick = () => {
-    setShowLoginView(true);
+  const handleUploadClick = () => {
+    setShowUploadView(true);
   }
 
-  const handleLoginExitClick = () => {
-    setShowLoginView(false);
+  const handleUploadExitClick = () => {
+    setShowUploadView(false);
   }
 
   return (
     <div className="bg-black min-h-screen" style={{ "color":"#CCCCCC" }}>
-      {showLoginView && <Login handleLoginExitClick={handleLoginExitClick}/>}
-      <Header handleLoginClick={handleLoginClick}/>
+      {showUploadView && <Upload handleUploadExitClick={handleUploadExitClick}/>}
+      <Header handleUploadClick={handleUploadClick}/>
       <div className="px-10">
         <BeatList />
       </div>
