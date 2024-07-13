@@ -1,6 +1,5 @@
 import Header from "./components/Header.jsx"
 import BeatList from "./components/BeatList.jsx"
-import Test from "./components/Test.jsx"
 import Upload from "./components/Upload.jsx"
 import { useState } from "react"
 
@@ -22,7 +21,6 @@ function App() {
       <div className="px-10">
         <BeatList />
       </div>
-      <Test />
     </div>
   )
 }

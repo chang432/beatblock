@@ -6,7 +6,7 @@ const ar = Arweave.init({
     protocol: "http",
 });
 
-const Test = () => {
+const TestUpload = () => {
 
     async function sendTransaction(e) {
         e.preventDefault();
@@ -97,4 +97,4 @@ const Test = () => {
     )
 }
 
-export default Test
+export default TestUpload
