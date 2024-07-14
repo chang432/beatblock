@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import rightSymbol from "../assets/rightSymbol.png"
 import downSymbol from "../assets/downSymbol.png"
 import musicNoteSymbol from "../assets/musicNoteSymbol.png"
@@ -6,25 +6,27 @@ import certificateSymbol from "../assets/certificateSymbol.png"
 import xSymbol from "../assets/xSymbol.png"
 
 const Cell = ({data, playPauseLogic}) => {
-    const [expanded, setExpanded] = new useState(true);
+    const [expanded, setExpanded] = new useState(false);
     const [showMusicPlayer, setShowMusicPlayer] = new useState(false);
+    var audioPlayer = useRef(null);
     // const [isPlaying, setIsPlaying] = useState(data.playPauseState === "pause");
 
     const expandPressed = () => {
-        setExpanded(!expanded);
+        setExpanded(!expanded)
     }
 
     const [progress, setProgress] = useState(0);
     useEffect(() => {
-        let audio = document.getElementById("beat_player");
-        const updateProgress = () => {
-            setProgress((audio.currentTime / audio.duration) * 100);
-        };
-
-        audio.addEventListener('timeupdate', updateProgress);
-        return () => {
-            audio.removeEventListener('timeupdate', updateProgress);
-        };
+        if (audioPlayer.current) {
+            const updateProgress = () => {
+                setProgress((audioPlayer.current.currentTime / audioPlayer.current.duration) * 100);
+            };
+    
+            audioPlayer.current.addEventListener('timeupdate', updateProgress);
+            return () => {
+                audioPlayer.current.removeEventListener('timeupdate', updateProgress);
+            };
+        }
     }, []);
 
     const handleProgressClick = (e) => {
@@ -32,9 +34,8 @@ const Cell = ({data, playPauseLogic}) => {
         const clickY = e.clientY - progressBar.getBoundingClientRect().top;
         const progressHeight = progressBar.clientHeight;
         const clickPosition = (progressHeight - clickY) / progressHeight; // Calculate the click position as a fraction of the progress bar height
-        let audio = document.getElementById("beat_player");
-        const newTime = audio.duration * clickPosition; // Calculate the new time
-        audio.currentTime = newTime; // Set the audio's current time
+        const newTime = audioPlayer.current.duration * clickPosition; // Calculate the new time
+        audioPlayer.current.currentTime = newTime; // Set the audio's current time
     };
 
     const toggleAudioPlayer = () => {
@@ -42,18 +43,18 @@ const Cell = ({data, playPauseLogic}) => {
         playPauseLogic(data.tx_id);
 
         var url = URL.createObjectURL(data.blob);
-        let audio_player = document.getElementById("beat_player");
-        audio_player.src = url;
+        audioPlayer.current.src = url;
 
         if (data.playPauseState === "pause") {
-            audio_player.play();
+            audioPlayer.current.play();
         } else {
-            audio_player.pause();
+            audioPlayer.current.pause();
         }
     }
 
     return (
         <div className="w-full">
+            {/* <button onClick={() => {setExpand(!expand)}}>EXPANDDDDD</button> */}
             { !expanded && <div className="w-full h-20 flex flex-row px-5 justify-between items-center mb-[0.1rem]" style={{"backgroundColor":"#1F1F1F"}}>
                 <div className="flex flex-row space-x-5 text-center">
                     <p className="border rounded-2xl px-2 w-32">{data.tx_id.substring(0,10)}...</p>
@@ -64,7 +65,10 @@ const Cell = ({data, playPauseLogic}) => {
                 </div>
                 <p>{data.note}</p>
                 <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={rightSymbol} onClick={expandPressed} />
-            </div>}
+            </div> }
+            {/* { cellState === 1 && <div className={`w-full ${expand ? "h-44" : "h-20"} duration-500 flex flex-row px-5 justify-between items-center mb-[0.1rem]`} style={{"backgroundColor":"#1F1F1F"}}>
+
+            </div> } */}
             { expanded && <div className="w-full h-44 flex flex-col pt-6 mb-[0.1rem]" style={{"backgroundColor":"#1F1F1F"}}>
                 <div className="flex flex-row px-5 justify-between items-start">
                     <div className="flex flex-col space-y-5">
@@ -101,9 +105,9 @@ const Cell = ({data, playPauseLogic}) => {
                             <img className="absolute w-8 h-8 mt-8 border border-[#2CEB06] bg-[#1F1F1F] rounded-3xl p-2 hover:cursor-pointer" src={xSymbol} onClick={toggleAudioPlayer} />
                         </div>
                     </div>
-                    <audio id="beat_player" />
+                    <audio ref={audioPlayer} />
                 </div>
-            </div>}
+            </div> }
         </div>
     )
 }
