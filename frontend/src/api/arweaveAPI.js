@@ -35,7 +35,7 @@ class API {
         });
     }
     
-    async sendTransaction(note, keyfile, audiofile) {
+    async sendTransaction(note, keyfile, audiofile, handleUploadExitClick) {
         // validation logic
 
         const reader = new FileReader();
@@ -74,10 +74,9 @@ class API {
                             await uploader.uploadChunk();
                             console.log(`${uploader.pctComplete}% complete, ${uploader.uploadedChunks}/${uploader.totalChunks}`);
                         }
-        
-                        // commit("setUploadBeatComplete", true)
                         resolve()
                         console.log("Tx successfully sent!");
+                        handleUploadExitClick();
                     };
                 });
 
@@ -85,8 +84,6 @@ class API {
                 console.error(err);
             }
         };
-
-        // const soundFile = document.getElementById("soundFile").files[0];
     }
 
     convertEpochToFormattedString(epochTime) {
