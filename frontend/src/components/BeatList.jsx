@@ -1,9 +1,7 @@
 import Cell from './Cell.jsx'
 import Loader from './sub_components/Loader.jsx'
 import { useEffect, useState } from 'react'
-import ArweaveAPI from '../api/arweaveAPI.js'
-
-const API = new ArweaveAPI();
+import api from '../api/arweaveAPI.js'
 
 const BeatList = () => {
     const [beats, setBeats] = useState([]);
@@ -31,7 +29,7 @@ const BeatList = () => {
     useEffect(() => {
         const fetchAndSetBeats = async () => {
             setShowLoader(true);
-            const local_beats = await API.queryAllBeatsArdb();
+            const local_beats = await api.queryAllBeatsArdb();
             setBeats(local_beats);
             setShowLoader(false);
         };
@@ -42,7 +40,7 @@ const BeatList = () => {
     }, [])
 
     async function test() {
-        const output = await API.getTxDate("LUhzbMasRNTThJVUmkP206VMeNKLZf6RenMsqL8n8t0");
+        const output = await api.getTxDate("LUhzbMasRNTThJVUmkP206VMeNKLZf6RenMsqL8n8t0");
         console.log("OUTPUT", output);
     }
 

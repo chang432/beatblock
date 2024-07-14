@@ -11,7 +11,7 @@ const ardb = new ArDB(ar);
 
 class API {
 
-    async generate () {
+    static async generate () {
         ar.wallets.generate().then(async (key) => {
             var public_key = await ar.wallets.getAddress(key);
             var filename = "arweave-key-" + public_key + ".json";
@@ -35,7 +35,7 @@ class API {
         });
     }
     
-    async sendTransaction(note, keyfile, audiofile, handleUploadExitClick) {
+    static async sendTransaction(note, keyfile, audiofile, handleUploadExitClick) {
         // validation logic
 
         const reader = new FileReader();
@@ -86,7 +86,7 @@ class API {
         };
     }
 
-    convertEpochToFormattedString(epochTime) {
+    static convertEpochToFormattedString(epochTime) {
         // Convert epoch time to milliseconds
         const date = new Date(parseInt(epochTime, 10) * 1000);
     
@@ -103,7 +103,7 @@ class API {
         return formattedDate;
     }
 
-    async getTxDate(beat_id) {
+    static async getTxDate(beat_id) {
         return new Promise(async (resolve) => {
             const tx_status = await ar.transactions.getStatus(beat_id);
             resolve(tx_status)
@@ -119,7 +119,7 @@ class API {
         })
     }
 
-    async getTxData(beat_id) {
+    static async getTxData(beat_id) {
         return new Promise((resolve) => {
             ar.transactions.getData(beat_id, { decode: true }).then((data) => {
             // data is Uint8Array
@@ -132,7 +132,7 @@ class API {
     }
 
     // Used for querying test data from ArLocal
-    async queryAllBeatsArdb() {
+    static async queryAllBeatsArdb() {
         var new_beats = [];
 
         const query_beats = await new Promise((resolve) => {
@@ -177,6 +177,63 @@ class API {
                 .then((final_beats) => {
                     resolve(final_beats);
                 }) 
+            });
+        })
+    }
+
+    static async queryAllBeatsFiltered (searchEntry) {
+        var new_beats = [];
+    
+        const queryByBeatOwner = await new Promise((resolve) => {
+          // Filter by beat owner
+          ardb
+            .search("transactions")
+            .appName("BeatLedger")
+            .from(searchEntry)
+            .findAll()
+            .then((txs) => {
+              resolve(txs);
+            });
+        });
+    
+        const queryByBeatName = await new Promise((resolve) => {
+          // Filter by beat name
+          ardb
+            .search("transactions")
+            .appName("BeatLedger")
+            .tag("Name", searchEntry)
+            .findAll()
+            .then((txs) => {
+              resolve(txs);
+            });
+        });
+    
+        return await new Promise((resolve) => {
+          Promise.all([queryByBeatOwner, queryByBeatName])
+            .then((combined_txs) => {
+              for (const tx_arr of combined_txs) {
+                for (const tx of tx_arr) {
+                  let new_beat = {
+                    name: tx.tags[2].value,
+                    tx_id: tx.id,
+                    owner_address: tx.owner.address,
+                    note: tx.tags[3].value,
+                    playPauseState: "faPlayComponent",
+                  };
+                  new_beats.push(new_beat);
+                }
+              }
+              return new_beats;
+            })
+            .then((new_beats) => {
+              Promise.all(
+                new_beats.map(async (obj) => {
+                  obj.blob = await this.getTxData(obj.tx_id);
+                  return obj;
+                })
+              ).then((new_beats) => {
+                resolve(new_beats)
+              });
             });
         })
     }

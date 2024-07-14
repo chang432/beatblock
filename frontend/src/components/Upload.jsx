@@ -1,10 +1,9 @@
 import xSymbol from "../assets/xSymbol.png"
-import arweaveAPI from "../api/arweaveAPI.js"
+import api from "../api/arweaveAPI.js"
 import Loader from "./sub_components/Loader.jsx"
 import { useRef, useState } from "react"
 
 const Upload = ({handleUploadExitClick}) => {  
-    const api = new arweaveAPI();
     const keyfileInputRef = useRef(null);
     const audiofileInputRef = useRef(null);
     const noteTextAreaRef = useRef(null);
