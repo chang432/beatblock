@@ -7,9 +7,9 @@ import xSymbol from "../assets/xSymbol.png"
 
 const Cell = ({data, playPauseLogic}) => {
     const [expanded, setExpanded] = new useState(false);
+    const [showExpandAnimation, setShowExpandAnimation] = new useState(false);
     const [showMusicPlayer, setShowMusicPlayer] = new useState(false);
     var audioPlayer = useRef(null);
-    // const [isPlaying, setIsPlaying] = useState(data.playPauseState === "pause");
 
     const expandPressed = () => {
         setExpanded(!expanded)
@@ -28,6 +28,10 @@ const Cell = ({data, playPauseLogic}) => {
             };
         }
     }, []);
+
+    useEffect(() => {
+        setShowExpandAnimation(expanded)
+    }, [expanded]);
 
     const handleProgressClick = (e) => {
         const progressBar = e.currentTarget;
@@ -54,8 +58,7 @@ const Cell = ({data, playPauseLogic}) => {
 
     return (
         <div className="w-full">
-            {/* <button onClick={() => {setExpand(!expand)}}>EXPANDDDDD</button> */}
-            { !expanded && <div className="w-full h-20 flex flex-row px-5 justify-between items-center mb-[0.1rem]" style={{"backgroundColor":"#1F1F1F"}}>
+            { !expanded && <div className={`w-full ${!showExpandAnimation ? "h-20" : "h-44"} duration-500 flex flex-row px-5 justify-between items-center mb-[0.1rem]`} style={{"backgroundColor":"#1F1F1F"}}>
                 <div className="flex flex-row space-x-5 text-center">
                     <p className="border rounded-2xl px-2 w-32">{data.tx_id.substring(0,10)}...</p>
                     <p>By</p>
@@ -66,10 +69,7 @@ const Cell = ({data, playPauseLogic}) => {
                 <p>{data.note}</p>
                 <img className="w-8 h-8 border rounded-3xl p-1 hover:cursor-pointer" src={rightSymbol} onClick={expandPressed} />
             </div> }
-            {/* { cellState === 1 && <div className={`w-full ${expand ? "h-44" : "h-20"} duration-500 flex flex-row px-5 justify-between items-center mb-[0.1rem]`} style={{"backgroundColor":"#1F1F1F"}}>
-
-            </div> } */}
-            { expanded && <div className="w-full h-44 flex flex-col pt-6 mb-[0.1rem]" style={{"backgroundColor":"#1F1F1F"}}>
+            { expanded && <div className={`w-full ${showExpandAnimation ? "h-44" : "h-20"} duration-500 flex flex-col pt-6 mb-[0.1rem]`} style={{"backgroundColor":"#1F1F1F"}}>
                 <div className="flex flex-row px-5 justify-between items-start">
                     <div className="flex flex-col space-y-5">
                         <div className="flex flex-row">
