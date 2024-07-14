@@ -9,25 +9,12 @@ const Cell = ({data, playPauseLogic}) => {
     const [expanded, setExpanded] = new useState(false);
     const [showExpandAnimation, setShowExpandAnimation] = new useState(false);
     const [showMusicPlayer, setShowMusicPlayer] = new useState(false);
+    const [progress, setProgress] = useState(0);
     var audioPlayer = useRef(null);
 
     const expandPressed = () => {
         setExpanded(!expanded)
     }
-
-    const [progress, setProgress] = useState(0);
-    useEffect(() => {
-        if (audioPlayer.current) {
-            const updateProgress = () => {
-                setProgress((audioPlayer.current.currentTime / audioPlayer.current.duration) * 100);
-            };
-    
-            audioPlayer.current.addEventListener('timeupdate', updateProgress);
-            return () => {
-                audioPlayer.current.removeEventListener('timeupdate', updateProgress);
-            };
-        }
-    }, []);
 
     useEffect(() => {
         setShowExpandAnimation(expanded)
@@ -40,6 +27,7 @@ const Cell = ({data, playPauseLogic}) => {
         const clickPosition = (progressHeight - clickY) / progressHeight; // Calculate the click position as a fraction of the progress bar height
         const newTime = audioPlayer.current.duration * clickPosition; // Calculate the new time
         audioPlayer.current.currentTime = newTime; // Set the audio's current time
+        setProgress((audioPlayer.current.currentTime / audioPlayer.current.duration) * 100);
     };
 
     const toggleAudioPlayer = () => {
