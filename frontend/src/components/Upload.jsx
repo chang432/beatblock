@@ -1,6 +1,7 @@
 import xSymbol from "../assets/xSymbol.png"
 import arweaveAPI from "../api/arweaveAPI.js"
-import { useRef, useState } from "react";
+import Loader from "./sub_components/Loader.jsx"
+import { useRef, useState } from "react"
 
 const Upload = ({handleUploadExitClick}) => {  
     const api = new arweaveAPI();
@@ -30,7 +31,7 @@ const Upload = ({handleUploadExitClick}) => {
             <div className="absolute w-screen h-screen z-40 bg-black opacity-70"></div>
             <img src={xSymbol} onClick={handleUploadExitClick} className="absolute z-50 w-8 h-8 p-2 border rounded-full right-10 top-10 hover:cursor-pointer"/>
             <div className='absolute flex flex-col bg-[#CCCCCC] rounded-sm h-fit w-fit p-10 space-y-10 items-center justify-center blur-none z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'>
-                {showLoading && <div className="w-16 h-16 border-8 border-[#2CEB06] border-dashed rounded-full animate-spin"></div>}
+                {showLoading && <Loader />}
                 {!showLoading && <div className="flex flex-col bg-[#CCCCCC] rounded-sm h-fit w-fit space-y-10 items-center justify-center">
                     <div className="flex flex-col items-center space-y-2">
                         <p>Note:</p>

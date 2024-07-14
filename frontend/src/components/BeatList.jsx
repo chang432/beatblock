@@ -1,4 +1,5 @@
 import Cell from './Cell.jsx'
+import Loader from './sub_components/Loader.jsx'
 import { useEffect, useState } from 'react'
 import ArweaveAPI from '../api/arweaveAPI.js'
 
@@ -6,6 +7,7 @@ const API = new ArweaveAPI();
 
 const BeatList = () => {
     const [beats, setBeats] = useState([]);
+    const [showLoader, setShowLoader] = useState(false);
 
     const playPauseLogic = (pressedTxId) => {
         var new_beats = [];
@@ -28,8 +30,10 @@ const BeatList = () => {
 
     useEffect(() => {
         const fetchAndSetBeats = async () => {
+            setShowLoader(true);
             const local_beats = await API.queryAllBeatsArdb();
             setBeats(local_beats);
+            setShowLoader(false);
         };
 
         if (beats.length === 0) {
@@ -43,7 +47,8 @@ const BeatList = () => {
     }
 
     return(
-        <div>
+        <div className='flex flex-col items-center'>
+            {showLoader && <Loader />}
             <button onClick={test}>test</button>
             {beats.map((entry, index) => {
                 return <Cell key={index} data={entry} playPauseLogic={playPauseLogic} />

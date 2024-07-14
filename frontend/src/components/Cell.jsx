@@ -53,7 +53,7 @@ const Cell = ({data, playPauseLogic}) => {
     }
 
     return (
-        <div>
+        <div className="w-full">
             { !expanded && <div className="w-full h-20 flex flex-row px-5 justify-between items-center mb-[0.1rem]" style={{"backgroundColor":"#1F1F1F"}}>
                 <div className="flex flex-row space-x-5 text-center">
                     <p className="border rounded-2xl px-2 w-32">{data.tx_id.substring(0,10)}...</p>
