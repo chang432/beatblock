@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "ardb": "^1.1.10",
-    "arweave": "^1.15.1",
+    "arweave": "^1.15.5",
     "autoprefixer": "^10.4.19",
     "daisyui": "^4.10.5",
     "postcss": "^8.4.38",

@@ -185,10 +185,10 @@ class API {
         var new_beats = [];
     
         const queryByBeatOwner = await new Promise((resolve) => {
-          // Filter by beat owner
+          // Filter by beat owner walled id
           ardb
             .search("transactions")
-            .appName("BeatLedger")
+            .appName("BeatBlock")
             .from(searchEntry)
             .findAll()
             .then((txs) => {
@@ -197,11 +197,11 @@ class API {
         });
     
         const queryByBeatName = await new Promise((resolve) => {
-          // Filter by beat name
+          // Filter by note
           ardb
             .search("transactions")
-            .appName("BeatLedger")
-            .tag("Name", searchEntry)
+            .appName("BeatBlock")
+            .tag("Note", searchEntry)
             .findAll()
             .then((txs) => {
               resolve(txs);
@@ -213,14 +213,14 @@ class API {
             .then((combined_txs) => {
               for (const tx_arr of combined_txs) {
                 for (const tx of tx_arr) {
-                  let new_beat = {
-                    name: tx.tags[2].value,
-                    tx_id: tx.id,
-                    owner_address: tx.owner.address,
-                    note: tx.tags[3].value,
-                    playPauseState: "faPlayComponent",
-                  };
-                  new_beats.push(new_beat);
+                    let new_beat = {
+                        name: tx.tags[1].value,
+                        tx_id: tx.id,
+                        owner_address: tx.owner.address,
+                        note: tx.tags[2].value,
+                        playPauseState: "play",
+                    };
+                    new_beats.push(new_beat);
                 }
               }
               return new_beats;
@@ -229,6 +229,7 @@ class API {
               Promise.all(
                 new_beats.map(async (obj) => {
                   obj.blob = await this.getTxData(obj.tx_id);
+                  obj.date = await this.getTxDate(obj.tx_id);
                   return obj;
                 })
               ).then((new_beats) => {

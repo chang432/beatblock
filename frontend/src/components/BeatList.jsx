@@ -3,7 +3,7 @@ import Loader from './sub_components/Loader.jsx'
 import { useEffect, useState } from 'react'
 import api from '../api/arweaveAPI.js'
 
-const BeatList = () => {
+const BeatList = ({searchContents}) => {
     const [beats, setBeats] = useState([]);
     const [showLoader, setShowLoader] = useState(false);
 
@@ -27,6 +27,19 @@ const BeatList = () => {
     }
 
     useEffect(() => {
+        const fetchAndSetFilteredBeats = async () => {
+            if (searchContents) {
+                console.log("search contents:", searchContents);
+                setShowLoader(true);
+                const local_beats = await api.queryAllBeatsFiltered(searchContents);
+                setBeats(local_beats);
+                setShowLoader(false);
+            }
+        }
+        fetchAndSetFilteredBeats()
+    }, [searchContents])
+
+    useEffect(() => {
         const fetchAndSetBeats = async () => {
             setShowLoader(true);
             const local_beats = await api.queryAllBeatsArdb();
@@ -47,7 +60,7 @@ const BeatList = () => {
     return(
         <div className='flex flex-col items-center'>
             {showLoader && <Loader />}
-            <button onClick={test}>test</button>
+            {/* <button onClick={test}>test</button> */}
             {beats.map((entry, index) => {
                 return <Cell key={index} data={entry} playPauseLogic={playPauseLogic} />
             })}
