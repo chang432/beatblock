@@ -2,7 +2,7 @@ import Header from "./components/Header.jsx"
 import SearchBar from "./components/sub_components/SearchBar.jsx"
 import BeatList from "./components/BeatList.jsx"
 import Upload from "./components/Upload.jsx"
-import Sandbox from "./components/Sandbox.jsx"
+// import Sandbox from "./components/Sandbox.jsx"
 import { useState } from "react"
 
 function App() {
@@ -24,7 +24,7 @@ function App() {
       <div className="px-10">
         <SearchBar setSearchContents={setSearchContents}/>
         <BeatList searchContents={searchContents}/>
-        <Sandbox />
+        {/* <Sandbox /> */}
       </div>
     </div>
   )

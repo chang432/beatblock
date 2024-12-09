@@ -1,19 +1,26 @@
-import Ar from 'arweave'
+import Arweave from 'arweave'
 import ArDB from 'ardb'
+import Axios from 'axios'
 
-const ar = Ar.init({
-    host: "localhost",
-    port: 1984,
-    protocol: "http",
+const local_port = 1984;
+
+const arweave_real = Arweave.init({});
+
+const arweave_local = Arweave.init({
+    host: '127.0.0.1',
+    port: local_port,
+    protocol: 'http'
 });
 
-const ardb = new ArDB(ar);
-
 class API {
+    constructor(testing) {
+        this.arweave = testing ? arweave_local : arweave_real;
+        this.ardb = new ArDB(this.arweave);
+    }
 
-    static async generate () {
-        ar.wallets.generate().then(async (key) => {
-            var public_key = await ar.wallets.getAddress(key);
+    async generate () {
+        this.arweave.wallets.generate().then(async (key) => {
+            var public_key = await this.arweave.wallets.getAddress(key);
             var filename = "arweave-key-" + public_key + ".json";
             var file = new Blob([JSON.stringify(key)], { type: JSON });
             if (window.navigator.msSaveOrOpenBlob)
@@ -35,15 +42,15 @@ class API {
         });
     }
     
-    static async sendTransaction(note, keyfile, audiofile, handleUploadExitClick) {
-        // validation logic
+    async sendTransaction(note, keyfile, audiofile, handleUploadExitClick) {
+        const self = this;    // Need to store class ref for promise use
 
         const reader = new FileReader();
         reader.readAsText(keyfile);
         reader.onload = async (f) => {
             try {
                 const keyFileData = JSON.parse(f.target.result);
-                const publicKey = await ar.wallets.getAddress(keyFileData);
+                const publicKey = await this.arweave.wallets.getAddress(keyFileData);
                 const privateKey = keyFileData
                 console.log(publicKey);      
                 console.log(privateKey);
@@ -54,9 +61,11 @@ class API {
                     fr.onload = async function () {
                         var arrayBufferOne = fr.result;
         
-                        await ar.api.get("/mint/" + publicKey + "/100000000000000");
+                        await Axios.get(`http://127.0.0.1:${local_port}/mint/${publicKey}/100000000000000`);
+                        await Axios.get(`http://127.0.0.1:${local_port}/mine`);
 
-                        let transaction = await ar.createTransaction(
+                        console.log(`HELLO: ${self.arweave}`);
+                        let transaction = await self.arweave.createTransaction(
                             {
                                 data: arrayBufferOne,
                             },
@@ -66,9 +75,9 @@ class API {
                         transaction.addTag("App-Name", "BeatBlock");
                         transaction.addTag("Note", note);
         
-                        await ar.transactions.sign(transaction, privateKey);
+                        await self.arweave.transactions.sign(transaction, privateKey);
         
-                        let uploader = await ar.transactions.getUploader(transaction);
+                        let uploader = await self.arweave.transactions.getUploader(transaction);
 
                         while (!uploader.isComplete) {
                             await uploader.uploadChunk();
@@ -86,7 +95,7 @@ class API {
         };
     }
 
-    static convertEpochToFormattedString(epochTime) {
+    convertEpochToFormattedString(epochTime) {
         // Convert epoch time to milliseconds
         const date = new Date(parseInt(epochTime, 10) * 1000);
     
@@ -103,9 +112,9 @@ class API {
         return formattedDate;
     }
 
-    static async getTxDate(beat_id) {
+    async getTxDate(beat_id) {
         return new Promise(async (resolve) => {
-            const tx_status = await ar.transactions.getStatus(beat_id);
+            const tx_status = await this.arweave.transactions.getStatus(beat_id);
             resolve(tx_status)
         })
         .then(async (res) => {
@@ -114,14 +123,14 @@ class API {
             }
 
             var block_indep_hash = res.confirmed.block_indep_hash
-            const result = await ar.blocks.get(block_indep_hash); 
+            const result = await this.arweave.blocks.get(block_indep_hash); 
             return this.convertEpochToFormattedString(result.timestamp)
         })
     }
 
-    static async getTxData(beat_id) {
+    async getTxData(beat_id) {
         return new Promise((resolve) => {
-            ar.transactions.getData(beat_id, { decode: true }).then((data) => {
+            this.arweave.transactions.getData(beat_id, { decode: true }).then((data) => {
             // data is Uint8Array
             const blob = new Blob([data], {
                 type: "audio/mpeg",
@@ -132,11 +141,11 @@ class API {
     }
 
     // Used for querying test data from ArLocal
-    static async queryAllBeatsArdb() {
+    async queryAllBeatsArdb() {
         var new_beats = [];
 
         const query_beats = await new Promise((resolve) => {
-            ardb
+            this.ardb
             .search("transactions")
             .appName("BeatBlock")
             .findAll()
@@ -181,12 +190,12 @@ class API {
         })
     }
 
-    static async queryAllBeatsFiltered (searchEntry) {
+    async queryAllBeatsFiltered (searchEntry) {
         var new_beats = [];
     
         const queryByBeatOwner = await new Promise((resolve) => {
           // Filter by beat owner walled id
-          ardb
+          this.ardb
             .search("transactions")
             .appName("BeatBlock")
             .from(searchEntry)
@@ -198,7 +207,7 @@ class API {
     
         const queryByBeatName = await new Promise((resolve) => {
           // Filter by note
-          ardb
+          this.ardb
             .search("transactions")
             .appName("BeatBlock")
             .tag("Note", searchEntry)

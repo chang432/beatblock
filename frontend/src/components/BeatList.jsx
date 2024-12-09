@@ -1,11 +1,12 @@
 import Cell from './Cell.jsx'
 import Loader from './sub_components/Loader.jsx'
 import { useEffect, useState } from 'react'
-import api from '../api/arweaveAPI.js'
+import API from '../api/arweaveAPI.js'
 
 const BeatList = ({searchContents}) => {
     const [beats, setBeats] = useState([]);
     const [showLoader, setShowLoader] = useState(false);
+    const api = new API(true);
 
     const playPauseLogic = (pressedTxId) => {
         var new_beats = [];
