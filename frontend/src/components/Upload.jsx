@@ -1,14 +1,27 @@
 import xSymbol from "../assets/xSymbol.png"
 import API from "../api/arweaveAPI.js"
 import Loader from "./sub_components/Loader.jsx"
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 
 const Upload = ({handleUploadExitClick}) => {  
     const keyfileInputRef = useRef(null);
     const audiofileInputRef = useRef(null);
     const noteTextAreaRef = useRef(null);
     const [showLoading, setShowLoading] = useState(false);
+    const [hasFreeBeat, setHasFreeBeat] = useState(false);
     const api = new API(true);
+    const LOCAL = false;
+
+    const handleKeyfileChange = async () => {
+        const publicKey = await api.keyfileToPublicKey(keyfileInputRef.current.files[0]);
+        console.log("public key: " + publicKey);
+        const hasWalletUsedSubsidization = await api.hasWalletUsedSubsidization(publicKey);
+        if (!hasWalletUsedSubsidization) {
+            setHasFreeBeat(true);
+        } else {
+            setHasFreeBeat(false);
+        }
+    }
 
     const handleGenerateKeyfileClick = () => {
         api.generate();
@@ -23,7 +36,14 @@ const Upload = ({handleUploadExitClick}) => {
         console.log(noteTextAreaRef.current.value);
         console.log(keyfileInputRef.current.files[0]);
         console.log(audiofileInputRef.current.files[0]);
-        api.sendTransaction(noteTextAreaRef.current.value, keyfileInputRef.current.files[0], audiofileInputRef.current.files[0], handleUploadExitClick);
+
+        // if (hasFreeBeat) {
+        if (true) {
+            console.log("Wallet has free beat, submitting subsidized transaction...");
+            api.sendSubsidizedTransaction(noteTextAreaRef.current.value, keyfileInputRef.current.files[0], audiofileInputRef.current.files[0], handleUploadExitClick, LOCAL);
+        } else {
+            api.sendTransaction(noteTextAreaRef.current.value, keyfileInputRef.current.files[0], audiofileInputRef.current.files[0], handleUploadExitClick);
+        }
     }
 
     return (
@@ -44,14 +64,15 @@ const Upload = ({handleUploadExitClick}) => {
                         </div>
                         <div className="flex flex-col items-center space-y-2">
                             <p>Keyfile:</p>
-                            <input type="file" accept=".json" className="border border-dashed border-black w-60 p-3" ref={keyfileInputRef}/>
+                            <input type="file" accept=".json" className="border border-dashed border-black w-60 p-3" ref={keyfileInputRef} onChange={handleKeyfileChange}/>
                             <div className="flex flex-row text-xs space-x-1">
                                 <p>Don't have one?</p>
-                                <button onClick={handleGenerateKeyfileClick} className="text-[#3A832C]">Generate here</button>
+                                <button onClick={handleGenerateKeyfileClick} className="text-[#3A832C]">Generate wallet here</button>
                             </div>
                         </div>
                     </div>
                     <button className="btn btn-sm" onClick={handleSubmitClick}>Submit</button>
+                    {hasFreeBeat && <p>You have 1 free beat (5MB) available to upload!</p>}
                 </div>}
             </div>
         </div>

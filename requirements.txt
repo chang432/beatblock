@@ -8,6 +8,7 @@ charset-normalizer==3.3.2
 click==8.1.7
 durationpy==0.6
 Flask==3.0.3
+Flask-Cors==5.0.0
 Flask-S3==0.3.3
 hjson==3.1.0
 idna==3.7

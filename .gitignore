@@ -25,3 +25,10 @@ dist-ssr
 
 *-template-*.json
 venv
+.env
+
+*.zip
+node_modules
+logs
+*.log
+creds

@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.709.0",
+    "arlocal": "^1.1.66",
+    "arweave": "^1.15.5",
+    "axios": "^1.7.8"
+  },
+  "scripts": {
+    "arlocally": "node -e \"const { handler } = require('./index.js'); handler(JSON.parse(fs.readFileSync('./testing/test-arlocal-event.json'))).then(console.log);\"",
+    "locally": "node -e \"const { handler } = require('./index.js'); handler(JSON.parse(fs.readFileSync('./testing/test-local-event.json'))).then(console.log);\""
+  }
+}

@@ -1,14 +1,19 @@
 import Arweave from 'arweave'
 import ArDB from 'ardb'
 import Axios from 'axios'
+import { LambdaClient,InvokeCommand } from '@aws-sdk/client-lambda';
 
-const local_port = 1984;
+const localPort = 1984;
+
+const masterWalletKey = "OHkkHPdBDHbjcDTLDBBCMv1b05z3i7HP4cVzb1CFdUg";
+
+const arweaveGraphqlEndpoint = "https://arweave.net/graphql";
 
 const arweave_real = Arweave.init({});
 
 const arweave_local = Arweave.init({
     host: '127.0.0.1',
-    port: local_port,
+    port: localPort,
     protocol: 'http'
 });
 
@@ -42,7 +47,17 @@ class API {
         });
     }
     
-    async sendTransaction(note, keyfile, audiofile, handleUploadExitClick) {
+    async sendTransaction(note=null, keyfile=null, audiofile=null, handleUploadExitClick=null) {
+        if (note == null || typeof note !== "string") {
+            console.log("Error note is null or not a string!");
+        } else if (keyfile == null || typeof note !== "object") {
+            console.log("Error note is null or not an object!");
+        } else if (audiofile == null || typeof audiofile !== "object") {
+            console.log("Error audiofile is null or not an object!");
+        } else if (handleUploadExitClick == null || typeof handleUploadExitClick !== "function") {
+            console.log("Error handleUploadExitClick is null or not a function!");
+        }
+
         const self = this;    // Need to store class ref for promise use
 
         const reader = new FileReader();
@@ -61,10 +76,9 @@ class API {
                     fr.onload = async function () {
                         var arrayBufferOne = fr.result;
         
-                        await Axios.get(`http://127.0.0.1:${local_port}/mint/${publicKey}/100000000000000`);
-                        await Axios.get(`http://127.0.0.1:${local_port}/mine`);
+                        await Axios.get(`http://127.0.0.1:${localPort}/mint/${publicKey}/100000000000000`);
+                        await Axios.get(`http://127.0.0.1:${localPort}/mine`);
 
-                        console.log(`HELLO: ${self.arweave}`);
                         let transaction = await self.arweave.createTransaction(
                             {
                                 data: arrayBufferOne,
@@ -93,6 +107,67 @@ class API {
                 console.error(err);
             }
         };
+    }
+
+    async sendSubsidizedTransaction(note=null, keyfile=null, audiofile=null, handleUploadExitClick=null, local=false) {
+        if (note == null || typeof note !== "string") {
+            console.log("Error note is null or not a string!");
+        } else if (keyfile == null || typeof keyfile !== "object") {
+            console.log("Error keyfile is null or not an object!");
+        } else if (audiofile == null || typeof audiofile !== "object") {
+            console.log("Error audiofile is null or not an object!");
+        } else if (handleUploadExitClick == null || typeof handleUploadExitClick !== "function") {
+            console.log("Error handleUploadExitClick is null or not a function!");
+        }
+
+        const reader = new FileReader();
+        reader.readAsText(keyfile);
+        reader.onload = async (f) => {
+            const keyFileData = JSON.parse(f.target.result);
+
+            await new Promise(() => {
+                const fr = new FileReader();
+                fr.readAsDataURL(audiofile);
+                fr.onload = async function (event) {
+                    var audioBase64 = fr.result;
+
+                    var lambdaClient;
+                    
+                    if (local) {
+                        lambdaClient = new LambdaClient({
+                            region: "us-east-1",
+                            credentials: {
+                                accessKeyId: "{{ACCESS_KEY}}",        // DO NOT COMMIT THIS!!!!
+                                secretAccessKey: "{{SECRET_ACCESS_KEY}}",   // DO NOT COMMIT THIS!!!!
+                            }
+                        });
+                    } else {
+                        lambdaClient = new LambdaClient({
+                            region: "us-east-1",
+                        });
+                    }
+            
+                    const params = {
+                        "FunctionName": "BeatBlockTransactionSubsidizerSubmitter",
+                        "Payload": JSON.stringify({
+                            "state": "prod",
+                            "dry_run": false,
+                            "userKeyFile": keyFileData,
+                            "audioFile": audioBase64,
+                            "note": note
+                        })
+                    };
+
+                    const lambdaCmd = new InvokeCommand(params);
+                    const lambdaResponse = await lambdaClient.send(lambdaCmd);
+                    if (lambdaResponse.StatusCode != 200) {
+                        throw new Error("Subsidization failed! Look into CloudWatch logs to troubleshoot...");
+                    } else { 
+                        console.log("Successfully submitted subsidized audio!");
+                    }
+                }
+            });
+        }
     }
 
     convertEpochToFormattedString(epochTime) {
@@ -247,6 +322,57 @@ class API {
             });
         })
     }
+
+    /**
+     * Checks if the specified wallet has gotten a free beat subsidization from the master wallet
+     * @param {string} userKey - public key of the user wallet to check
+     * @returns {boolean} 
+     */
+    async hasWalletUsedSubsidization(userKey) {
+        const recipientQuery = `
+        query {
+            transactions(
+                owners: ["${masterWalletKey}"]
+            ) {
+                edges {
+                    node {
+                        recipient
+                    }
+                }
+            }
+        }`;
+
+        const response = await Axios.post(arweaveGraphqlEndpoint, { query: recipientQuery });
+        const recipientList = response.data.data.transactions.edges;
+
+        for (let entry of recipientList) {
+            let recipient = entry.node.recipient;
+            console.log(recipient);
+            if (recipient === userKey) {
+                console.log(`User key ${userKey} has been subsidized already!`);
+                return true;
+            } 
+        }
+        return false;
+    }
+
+    async keyfileToPublicKey(keyfile) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsText(keyfile);
+            reader.onload = async (f) => {
+                try {
+                    const keyFileData = JSON.parse(f.target.result);
+                    resolve(await this.arweave.wallets.getAddress(keyFileData));
+
+                } catch (err) {
+                    console.error(err);
+                    reject(err);
+                }
+            };
+        });
+    }
 }
+
 
 export default API;
