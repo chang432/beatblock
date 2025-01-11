@@ -9,8 +9,8 @@ const Upload = ({handleUploadExitClick}) => {
     const noteTextAreaRef = useRef(null);
     const [showLoading, setShowLoading] = useState(false);
     const [hasFreeBeat, setHasFreeBeat] = useState(false);
-    const api = new API(true);
-    const LOCAL = false;
+    const api = new API(testing=true);
+    const LOCAL = false;    // replaced in local_deploy.sh
 
     const handleKeyfileChange = async () => {
         const publicKey = await api.keyfileToPublicKey(keyfileInputRef.current.files[0]);
@@ -38,7 +38,7 @@ const Upload = ({handleUploadExitClick}) => {
         console.log(audiofileInputRef.current.files[0]);
 
         // if (hasFreeBeat) {
-        if (true) {
+        if (hasFreeBeat) {
             console.log("Wallet has free beat, submitting subsidized transaction...");
             api.sendSubsidizedTransaction(noteTextAreaRef.current.value, keyfileInputRef.current.files[0], audiofileInputRef.current.files[0], handleUploadExitClick, LOCAL);
         } else {

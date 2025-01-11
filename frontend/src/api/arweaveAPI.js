@@ -137,8 +137,8 @@ class API {
                         lambdaClient = new LambdaClient({
                             region: "us-east-1",
                             credentials: {
-                                accessKeyId: "{{ACCESS_KEY}}",        // DO NOT COMMIT THIS!!!!
-                                secretAccessKey: "{{SECRET_ACCESS_KEY}}",   // DO NOT COMMIT THIS!!!!
+                                accessKeyId: "{{ACCESS_KEY}}",   // replaced in local_deploy.sh
+                                secretAccessKey: "{{SECRET_ACCESS_KEY}}",   // replaced in local_deploy.sh
                             }
                         });
                     } else {
@@ -164,6 +164,7 @@ class API {
                         throw new Error("Subsidization failed! Look into CloudWatch logs to troubleshoot...");
                     } else { 
                         console.log("Successfully submitted subsidized audio!");
+                        handleUploadExitClick();
                     }
                 }
             });
